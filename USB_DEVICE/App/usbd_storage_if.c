@@ -23,7 +23,7 @@
 #include "usbd_storage_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "fatfs_sd.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -74,8 +74,10 @@
 #undef STORAGE_BLK_SIZ
 
 #define STORAGE_LUN_NBR 1
-#define STORAGE_BLK_NBR	200
+#define STORAGE_BLK_NBR	50
 #define STORAGE_BLK_SIZ 0x200
+
+#define pDrv 0
 
 /* USER CODE END PRIVATE_DEFINES */
 
@@ -123,8 +125,8 @@ const int8_t STORAGE_Inquirydata_FS[] = {/* 36 */
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
 
-static uint8_t RAM_buffer[STORAGE_BLK_NBR*STORAGE_BLK_SIZ];
-
+//static uint8_t RAM_buffer[STORAGE_BLK_NBR*STORAGE_BLK_SIZ];
+static uint16_t sBlockSize = 0;
 /* USER CODE END PRIVATE_VARIABLES */
 
 /**
@@ -188,7 +190,8 @@ USBD_StorageTypeDef USBD_Storage_Interface_fops_FS =
 int8_t STORAGE_Init_FS(uint8_t lun)
 {
   /* USER CODE BEGIN 2 */
-  return (USBD_OK);
+  if (SD_disk_initialize(pDrv) != RES_OK) return USBD_FAIL;
+  return USBD_OK;
   /* USER CODE END 2 */
 }
 
@@ -202,8 +205,16 @@ int8_t STORAGE_Init_FS(uint8_t lun)
 int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_size)
 {
   /* USER CODE BEGIN 3 */
-  *block_num  = STORAGE_BLK_NBR;
-  *block_size = STORAGE_BLK_SIZ;
+	uint16_t num_sectors = 0;
+	uint16_t sector_size = 0;
+	DRESULT res = SD_disk_ioctl(pDrv, GET_SECTOR_COUNT, &num_sectors);
+	if (res != RES_OK) return USBD_FAIL;
+
+	res = SD_disk_ioctl(pDrv, GET_SECTOR_SIZE, &sector_size);
+	if (res != RES_OK) return USBD_FAIL;
+
+  *block_num  = (num_sectors / 2) * 2048;
+  *block_size = SD_BLOCK_SIZE;
   return (USBD_OK);
   /* USER CODE END 3 */
 }
@@ -216,7 +227,8 @@ int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_
 int8_t STORAGE_IsReady_FS(uint8_t lun)
 {
   /* USER CODE BEGIN 4 */
-  return (USBD_OK);
+	if (SD_disk_status(pDrv) == RES_OK) return USBD_OK;
+	else return USBD_FAIL;
   /* USER CODE END 4 */
 }
 
@@ -240,7 +252,7 @@ int8_t STORAGE_IsWriteProtected_FS(uint8_t lun)
 int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 6 */
-	memcpy(buf, &RAM_buffer[blk_addr*STORAGE_BLK_SIZ], blk_len*STORAGE_BLK_SIZ);
+	if (SD_disk_read(pDrv, buf, (blk_addr), blk_len) != RES_OK) return USBD_FAIL;
 	return (USBD_OK);
   /* USER CODE END 6 */
 }
@@ -253,8 +265,8 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t bl
 int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 7 */
-	memcpy(&RAM_buffer[blk_addr*STORAGE_BLK_SIZ], buf, blk_len*STORAGE_BLK_SIZ);
-  return (USBD_OK);
+	if (SD_disk_write(pDrv, buf, (blk_addr), blk_len) != RES_OK) return USBD_FAIL;
+		return (USBD_OK);
   /* USER CODE END 7 */
 }
 

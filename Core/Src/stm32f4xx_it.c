@@ -53,6 +53,18 @@
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+volatile uint8_t FatFSCnt = 0;
+volatile uint8_t Timer1, Timer2;
+
+void SDTimer_Handler(void) {
+	if (Timer1 > 0)
+		--Timer2;
+
+	if (Timer2 > 0)
+		--Timer2;
+}
+
+
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -184,6 +196,13 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
+
+
+	++FatFSCnt;
+	if (FatFSCnt >= 10){
+		FatFSCnt = 0;
+		SDTimer_Handler();
+	}
 
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();

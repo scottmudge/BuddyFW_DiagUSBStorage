@@ -65,6 +65,7 @@ USBD_HandleTypeDef hUsbDeviceFS;
 void MX_USB_DEVICE_Init(void)
 {
   /* USER CODE BEGIN USB_DEVICE_Init_PreTreatment */
+	MX_Real_SPI1_Init();
 
   /* USER CODE END USB_DEVICE_Init_PreTreatment */
 
