@@ -58,6 +58,11 @@ static void MX_SPI1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+// Enable desired fault conditions
+USBFaultType_t g_ActiveFault =
+		(USBFault_RandomLongDelays);
+
+
 /* USER CODE END 0 */
 
 /**
@@ -83,8 +88,6 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  HAL_PWREx_EnableOverDrive();
-
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */

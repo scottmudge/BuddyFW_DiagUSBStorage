@@ -124,9 +124,6 @@ const int8_t STORAGE_Inquirydata_FS[] = {/* 36 */
 /* USER CODE END INQUIRY_DATA_FS */
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
-
-//static uint8_t RAM_buffer[STORAGE_BLK_NBR*STORAGE_BLK_SIZ];
-static uint16_t sBlockSize = 0;
 /* USER CODE END PRIVATE_VARIABLES */
 
 /**
