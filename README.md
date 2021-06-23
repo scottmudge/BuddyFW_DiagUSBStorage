@@ -1,6 +1,6 @@
 ## Prusa Buddy FW - Diagnostic USB MSC Firmware
 
-#### Description
+### Description
 
 This is firmware for STM32F4 (STM23F446RE) which aims to reproduce potential issues with USB mass storage devices, which may cause the Prusa Buddy FW to encounter faults or unexpected behaviors. While it may not be possible to easily reproduce problematic hardware (unstable oscillators, noisy circuits, etc.) it is still possible to reproduce problematic firmware.
 
@@ -10,7 +10,7 @@ The storage device behaves as a FS device. Combined with the slower SPI-SD inter
 
 
 
-#### Implemented Fault Types
+### Implemented Fault Types
 
 Multiple fault types can be active at one time, and are defined in `fault_config.h`.
 
@@ -19,13 +19,13 @@ Multiple fault types can be active at one time, and are defined in `fault_config
 - **Long Initialization** - Very long delays at various points during initialization
 
 
-#### Hardware
+### Hardware
 
 ![image](https://user-images.githubusercontent.com/19617165/123054956-60c4c300-d3d3-11eb-908b-48d9e36651cf.png)
 
 An STM32F446RE was used (Nucelo-64 board) as the foundation. A standard micro-SD socket with tristate buffers on the data pins was used, and the SD card is used in SPI mode. I also soldered together a dual channel logic inverter on the MISO/MOSI pins to peek at signal patterns and indicate visually when data is being accessed by the host (similar to a normal USB drive activity light). Any standard NOT gate will work here. 
 
 
-#### Results
+### Results
 
 Results are forthcoming...
