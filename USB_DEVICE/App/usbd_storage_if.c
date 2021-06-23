@@ -74,10 +74,16 @@
 #undef STORAGE_BLK_SIZ
 
 #define STORAGE_LUN_NBR 1
-#define STORAGE_BLK_NBR	50
+#define STORAGE_BLK_NBR	200
 #define STORAGE_BLK_SIZ 0x200
 
 #define pDrv 0
+#define USE_RAMDISK 1
+
+
+#if (USE_RAMDISK == 1)
+static uint8_t g_RamBuffer[STORAGE_BLK_NBR*STORAGE_BLK_SIZ];
+#endif
 
 /* USER CODE END PRIVATE_DEFINES */
 
@@ -187,8 +193,11 @@ USBD_StorageTypeDef USBD_Storage_Interface_fops_FS =
 int8_t STORAGE_Init_FS(uint8_t lun)
 {
   /* USER CODE BEGIN 2 */
+#if (USE_RAMDISK == 1)
+#else
   if (SD_disk_initialize(pDrv) != RES_OK) return USBD_FAIL;
   return USBD_OK;
+#endif
   /* USER CODE END 2 */
 }
 
@@ -202,6 +211,10 @@ int8_t STORAGE_Init_FS(uint8_t lun)
 int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_size)
 {
   /* USER CODE BEGIN 3 */
+#if (USE_RAMDISK == 1)
+	*block_num = STORAGE_BLK_NBR;
+	*block_size = STORAGE_BLK_SIZ;
+#else
 	uint16_t num_sectors = 0;
 	uint16_t sector_size = 0;
 	DRESULT res = SD_disk_ioctl(pDrv, GET_SECTOR_COUNT, &num_sectors);
@@ -210,8 +223,9 @@ int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_
 	res = SD_disk_ioctl(pDrv, GET_SECTOR_SIZE, &sector_size);
 	if (res != RES_OK) return USBD_FAIL;
 
-  *block_num  = (num_sectors / 2) * 2048;
+  *block_num  = (num_sectors * 1024);
   *block_size = SD_BLOCK_SIZE;
+#endif
   return (USBD_OK);
   /* USER CODE END 3 */
 }
@@ -224,8 +238,12 @@ int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_
 int8_t STORAGE_IsReady_FS(uint8_t lun)
 {
   /* USER CODE BEGIN 4 */
-	if (SD_disk_status(pDrv) == RES_OK) return USBD_OK;
-	else return USBD_FAIL;
+#if (USE_RAMDISK == 1)
+#else
+	if (SD_disk_status(pDrv) != RES_OK) return USBD_FAIL;
+
+#endif
+	return USBD_OK;
   /* USER CODE END 4 */
 }
 
@@ -249,8 +267,13 @@ int8_t STORAGE_IsWriteProtected_FS(uint8_t lun)
 int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 6 */
+#if (USE_RAMDISK == 1)
+  memcpy(buf, &g_RamBuffer[blk_addr*STORAGE_BLK_SIZ], blk_len*STORAGE_BLK_SIZ);
+#else
 	if (SD_disk_read(pDrv, buf, (blk_addr), blk_len) != RES_OK) return USBD_FAIL;
+#endif
 	return (USBD_OK);
+
   /* USER CODE END 6 */
 }
 
@@ -262,7 +285,11 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t bl
 int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 7 */
+#if (USE_RAMDISK == 1)
+	memcpy(&g_RamBuffer[blk_addr*STORAGE_BLK_SIZ], buf, blk_len*STORAGE_BLK_SIZ);
+#else
 	if (SD_disk_write(pDrv, buf, (blk_addr), blk_len) != RES_OK) return USBD_FAIL;
+#endif
 		return (USBD_OK);
   /* USER CODE END 7 */
 }

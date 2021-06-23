@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include "fatfs_sd.h"
 #include <string.h>
+#include "fault_config.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
