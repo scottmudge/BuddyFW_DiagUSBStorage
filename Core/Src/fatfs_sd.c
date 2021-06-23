@@ -447,6 +447,7 @@ DRESULT SD_disk_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count)
 }
 #endif /* _USE_WRITE */
 
+
 /* ioctl */
 DRESULT SD_disk_ioctl(BYTE drv, BYTE ctrl, void *buff) 
 {

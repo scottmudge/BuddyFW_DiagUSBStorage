@@ -125,4 +125,6 @@ extern SPI_HandleTypeDef 	hspi1;
 #define	SD_CS_PORT			SPI1_CS_GPIO_Port
 #define SD_CS_PIN			SPI1_CS_Pin
 
+#define pDrv 0
+
 #endif

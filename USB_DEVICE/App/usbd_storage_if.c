@@ -24,6 +24,7 @@
 
 /* USER CODE BEGIN INCLUDE */
 #include "fatfs_sd.h"
+//#include "user_diskio_spi.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -77,8 +78,7 @@
 #define STORAGE_BLK_NBR	200
 #define STORAGE_BLK_SIZ 0x200
 
-#define pDrv 0
-#define USE_RAMDISK 1
+#define USE_RAMDISK 0
 
 
 #if (USE_RAMDISK == 1)
@@ -184,6 +184,12 @@ USBD_StorageTypeDef USBD_Storage_Interface_fops_FS =
   (int8_t *)STORAGE_Inquirydata_FS
 };
 
+#define SPI_Init SD_disk_initialize
+#define SPI_ioctl SD_disk_ioctl
+#define SPI_status SD_disk_status
+#define SPI_read SD_disk_read
+#define SPI_write SD_disk_write
+
 /* Private functions ---------------------------------------------------------*/
 /**
   * @brief  Initializes over USB FS IP
@@ -195,7 +201,7 @@ int8_t STORAGE_Init_FS(uint8_t lun)
   /* USER CODE BEGIN 2 */
 #if (USE_RAMDISK == 1)
 #else
-  if (SD_disk_initialize(pDrv) != RES_OK) return USBD_FAIL;
+	//if (SPI_Init(pDrv) != RES_OK) return USBD_FAIL;
   return USBD_OK;
 #endif
   /* USER CODE END 2 */
@@ -215,16 +221,16 @@ int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_
 	*block_num = STORAGE_BLK_NBR;
 	*block_size = STORAGE_BLK_SIZ;
 #else
-	uint16_t num_sectors = 0;
+	uint32_t num_sectors = 0;
 	uint16_t sector_size = 0;
-	DRESULT res = SD_disk_ioctl(pDrv, GET_SECTOR_COUNT, &num_sectors);
+	DRESULT res = SPI_ioctl(pDrv, GET_SECTOR_COUNT, &num_sectors);
 	if (res != RES_OK) return USBD_FAIL;
 
-	res = SD_disk_ioctl(pDrv, GET_SECTOR_SIZE, &sector_size);
+	res = SPI_ioctl(pDrv, GET_SECTOR_SIZE, &sector_size);
 	if (res != RES_OK) return USBD_FAIL;
 
-  *block_num  = (num_sectors * 1024);
-  *block_size = SD_BLOCK_SIZE;
+  *block_num  = num_sectors;
+  *block_size = sector_size;
 #endif
   return (USBD_OK);
   /* USER CODE END 3 */
@@ -240,7 +246,7 @@ int8_t STORAGE_IsReady_FS(uint8_t lun)
   /* USER CODE BEGIN 4 */
 #if (USE_RAMDISK == 1)
 #else
-	if (SD_disk_status(pDrv) != RES_OK) return USBD_FAIL;
+	if (SPI_status(pDrv) != RES_OK) return USBD_FAIL;
 
 #endif
 	return USBD_OK;
@@ -270,7 +276,7 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t bl
 #if (USE_RAMDISK == 1)
   memcpy(buf, &g_RamBuffer[blk_addr*STORAGE_BLK_SIZ], blk_len*STORAGE_BLK_SIZ);
 #else
-	if (SD_disk_read(pDrv, buf, (blk_addr), blk_len) != RES_OK) return USBD_FAIL;
+	if (SPI_read(pDrv, buf, (blk_addr), blk_len) != RES_OK) return USBD_FAIL;
 #endif
 	return (USBD_OK);
 
@@ -288,7 +294,7 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
 #if (USE_RAMDISK == 1)
 	memcpy(&g_RamBuffer[blk_addr*STORAGE_BLK_SIZ], buf, blk_len*STORAGE_BLK_SIZ);
 #else
-	if (SD_disk_write(pDrv, buf, (blk_addr), blk_len) != RES_OK) return USBD_FAIL;
+	if (SPI_write(pDrv, buf, (blk_addr), blk_len) != RES_OK) return USBD_FAIL;
 #endif
 		return (USBD_OK);
   /* USER CODE END 7 */

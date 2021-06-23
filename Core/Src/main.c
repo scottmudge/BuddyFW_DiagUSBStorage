@@ -254,6 +254,11 @@ void MX_Real_SPI1_Init(void)
   {
     Error_Handler();
   }
+
+  HAL_Delay(100);
+  SD_disk_initialize(pDrv);
+  HAL_Delay(100);
+
 }
 /* USER CODE END 4 */
 
