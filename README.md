@@ -25,6 +25,8 @@ Multiple fault types can be active at one time, and are defined in `fault_config
 
 An STM32F446RE was used (Nucelo-64 board) as the foundation. A standard micro-SD socket with tristate buffers on the data pins was used, and the SD card is used in SPI mode. I also soldered together a dual channel logic inverter on the MISO/MOSI pins to peek at signal patterns and indicate visually when data is being accessed by the host (similar to a normal USB drive activity light). Any standard NOT gate will work here. 
 
+The Nucelo boards are quite old and lack modern USB sockets to the STLink USB/External Power port, so in the photo you will see an extra micro-usb socket patched in to this location on the Nucelo board. Simply ignore this, as it is unnecessary.
+
 
 ### Results
 
